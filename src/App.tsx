@@ -1,29 +1,18 @@
-import { useState } from 'react';
-import { TodoInput } from './components/TodoInput';
-import { TodoList } from './components/TodoList';
-import { FilterTabs, type Filter} from './components/FilterTabs';
-import { useTodos } from './hooks/useTodos';
+import { StoreProvider } from "./stores/StoreContext";
+import TodoList from "./components/TodoList";
+import TodoInput from "./components/TodoInput";
+import TodoFilter from "./components/TodoFilter";
 
 function App() {
-  const { todos, addTodo, toggleTodo } = useTodos();
-  const [filter, setFilter] = useState<Filter>('all');
-
-  const filteredTodos = todos.filter(todo => {
-    if (filter === 'active') return !todo.completed;
-    if (filter === 'completed') return todo.completed;
-    return true;
-  });
-
   return (
-    <main>
-      <h1>todos</h1>
-      <TodoInput onAdd={addTodo} />
-      <TodoList todos={filteredTodos} onToggle={toggleTodo} />
-      <footer>
-        <span>{todos.filter(t => !t.completed).length} items left</span>
-        <FilterTabs filter={filter} setFilter={setFilter} />
-      </footer>
-    </main>
+    <StoreProvider>
+      <div className="max-w-xl mx-auto mt-10 p-4 shadow-lg bg-white rounded-lg">
+        <h1 className="text-3xl font-bold text-center mb-4">todos</h1>
+        <TodoInput />
+        <TodoList />
+        <TodoFilter />
+      </div>
+    </StoreProvider>
   );
 }
 

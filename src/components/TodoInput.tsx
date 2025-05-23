@@ -1,22 +1,29 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { useStores } from "../stores/StoreContext";
 
-export function TodoInput({ onAdd }: { onAdd: (title: string) => void }) {
-  const [value, setValue] = useState('');
+export default function TodoInput() {
+  const [text, setText] = useState("");
+  const { todoStore } = useStores();
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && value.trim()) {
-      onAdd(value.trim());
-      setValue('');
+  const add = () => {
+    if (text.trim()) {
+      todoStore.addTodo(text.trim());
+      setText("");
     }
   };
 
   return (
-    <input
-      className="todo-input"
-      placeholder="What needs to be done?"
-      value={value}
-      onChange={e => setValue(e.target.value)}
-      onKeyDown={handleKeyDown}
-    />
+    <div className="mb-4 flex">
+      <input
+        className="border px-2 py-1 flex-grow rounded-l"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="What needs to be done?"
+        onKeyDown={(e) => e.key === "Enter" && add()}
+      />
+      <button onClick={add} className="bg-blue-500 text-white px-4 rounded-r">
+        Add
+      </button>
+    </div>
   );
 }
