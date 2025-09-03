@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useStores } from "../stores/StoreContext";
+import { useStores } from "../stores/context";
 
 export default function TodoInput() {
   const [text, setText] = useState("");

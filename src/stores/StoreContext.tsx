@@ -1,14 +1,7 @@
-import React, { createContext, useContext } from "react";
+import { type ReactNode } from "react";
+import { StoreContext } from "./context";
 import { todoStore } from "./TodoStore";
 
-const StoreContext = createContext({ todoStore });
-
-export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <StoreContext.Provider value={{ todoStore }}>
-      {children}
-    </StoreContext.Provider>
-  );
-};
-
-export const useStores = () => useContext(StoreContext);
+export const StoreProvider = ({ children }: { children: ReactNode }) => (
+  <StoreContext.Provider value={{ todoStore }}>{children}</StoreContext.Provider>
+);
