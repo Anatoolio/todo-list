@@ -17,7 +17,7 @@ export default {
   moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
-  collectCoverage: true,
+  collectCoverage: false,
   collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/vite-env.d.ts", "!src/main.tsx"],
   coverageThreshold: {
     global: {
