@@ -1,6 +1,6 @@
 import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { StoreContext } from "../stores/StoreContext";
+import { StoreContext } from "../stores/context";
 import { TodoStore } from "../stores/TodoStore";
 import TodoInput from "./TodoInput";
 import TodoList from "./TodoList";

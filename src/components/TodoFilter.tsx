@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { useStores } from "../stores/StoreContext";
+import { useStores } from "../stores/context";
 
 const TodoFilter = observer(() => {
   const { todoStore } = useStores();
