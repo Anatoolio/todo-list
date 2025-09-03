@@ -3,7 +3,7 @@ import { useStores } from "../stores/StoreContext";
 
 const TodoFilter = observer(() => {
   const { todoStore } = useStores();
-  const filters: ('all' | 'active' | 'completed')[] = ['all', 'active', 'completed'];
+  const filters: ("all" | "active" | "completed")[] = ["all", "active", "completed"];
 
   return (
     <div className="flex justify-between items-center">
@@ -12,15 +12,20 @@ const TodoFilter = observer(() => {
         {filters.map((f) => (
           <button
             key={f}
-            className={`px-2 py-1 border rounded ${
-              todoStore.filter === f ? "bg-gray-300" : ""
-            }`}
+            className={`px-2 py-1 border rounded ${todoStore.filter === f ? "bg-gray-300" : ""}`}
             onClick={() => todoStore.setFilter(f)}
           >
             {f}
           </button>
         ))}
       </div>
+      <button
+        className="px-2 py-1 border rounded"
+        onClick={() => todoStore.clearCompleted()}
+        disabled={!todoStore.todos.some((t) => t.completed)}
+      >
+        Clear completed
+      </button>
     </div>
   );
 });

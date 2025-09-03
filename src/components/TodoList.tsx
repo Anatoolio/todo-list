@@ -13,9 +13,7 @@ const TodoList = observer(() => {
             checked={todo.completed}
             onChange={() => todoStore.toggleTodo(todo.id)}
           />
-          <span className={todo.completed ? "line-through text-gray-400" : ""}>
-            {todo.title}
-          </span>
+          <span className={todo.completed ? "line-through text-gray-400" : ""}>{todo.title}</span>
         </li>
       ))}
     </ul>

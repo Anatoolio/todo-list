@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check formatting, linting, types, and run tests fast
+npm run format:check || exit 1
+npm run lint || exit 1
+npm run tsc || exit 1
+npm test -- --bail || exit 1
