@@ -23,6 +23,10 @@ body {
   color: #0f172a; /* slate-900 */
 }
 
+#root {
+  width: 100%;
+}
+
 a {
   font-weight: 500;
   color: #2563eb; /* blue-600 */
