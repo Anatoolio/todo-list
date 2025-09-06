@@ -1,0 +1,19 @@
+name: Enforce master merges from develop
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  enforce:
+    name: Ensure PR source is develop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check head branch
+        run: |
+          echo "Base: ${{ github.base_ref }} | Head: ${{ github.head_ref }}"
+          if [ "${{ github.head_ref }}" != "develop" ]; then
+            echo "::error::PR into 'master' must come from 'develop' (got '${{ github.head_ref }}')"
+            exit 1
+          fi
