@@ -1,54 +1,54 @@
-# React + TypeScript + Vite
+# Todo App — React + Go API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend: React + TypeScript + Vite + MobX + Tailwind. Backend: Go (chi) + SQLite.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 18+ и npm
+- Go 1.22+ (`brew install go` на macOS)
 
-## Expanding the ESLint configuration
+## Scripts
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- `npm run dev` — запускает Vite в режиме API (`VITE_USE_API=true`). Требуется запущенный сервер.
+- `npm run dev:server` — запускает Go API на `http://localhost:8080`.
+- `npm run dev:full` — поднимает сервер и клиент одновременно (через `concurrently`).
+- `npm run test` — тесты (Jest) с покрытием.
+- `npm run build` — сборка фронтенда.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+## Backend (Go)
+
+При старте создаёт БД SQLite по пути `./data/todos.db` и поднимает REST API:
+
+- `GET /api/todos?filter=all|active|completed`
+- `POST /api/todos` { title }
+- `PATCH /api/todos/:id` { title?, completed? }
+- `DELETE /api/todos/:id`
+- `POST /api/todos/clear-completed`
+
+Запуск:
+
+```
+npm run dev:server
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Frontend (Vite)
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+Dev-прокси маршрутизирует `/api` на `http://localhost:8080`.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    "react-x": reactX,
-    "react-dom": reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs["recommended-typescript"].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-});
+Запуск клиента в API‑режиме:
+
 ```
+npm run dev
+```
+
+Рекомендуемый способ — оба процесса сразу:
+
+```
+npm run dev:full
+```
+
+## Notes
+
+- По умолчанию клиент работает через API (localStorage отключён при `VITE_USE_API=true`).
+- Если нужен локальный режим без бэка — запустите Vite без флага или временно измените скрипт.
+- Порты: клиент `5173`, сервер `8080`. Прокси настраивается в `vite.config.ts`.
