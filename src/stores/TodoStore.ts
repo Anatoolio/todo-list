@@ -19,14 +19,15 @@ export class TodoStore {
       (todos) => {
         try {
           localStorage.setItem("todo-app/todos", JSON.stringify(todos));
-        } catch {
-          // ignore storage errors
+        } catch (e) {
+          console.error("[TodoStore] Failed to save todos to localStorage:", e);
         }
       }
     );
   }
 
   addTodo(title: string) {
+    if (!title.trim()) return;
     this.todos.push({ id: this.nextId++, title, completed: false });
   }
 
@@ -68,8 +69,8 @@ export class TodoStore {
         const maxId = this.todos.reduce((m, t) => Math.max(m, t.id), 0);
         this.nextId = maxId + 1;
       }
-    } catch {
-      // ignore broken storage
+    } catch (e) {
+      console.error("[TodoStore] Failed to load todos from localStorage:", e);
     }
   }
 }

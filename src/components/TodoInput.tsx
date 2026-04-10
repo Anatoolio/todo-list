@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { observer } from "mobx-react-lite";
 import { useStores } from "../stores/context";
 
-export default function TodoInput() {
+const TodoInput = observer(function TodoInput() {
   const [text, setText] = useState("");
   const { todoStore } = useStores();
 
@@ -26,4 +27,6 @@ export default function TodoInput() {
       </button>
     </div>
   );
-}
+});
+
+export default TodoInput;

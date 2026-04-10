@@ -12,15 +12,16 @@ const TodoFilter = observer(() => {
         {filters.map((f) => (
           <button
             key={f}
-            className={`px-2 py-1 border rounded ${todoStore.filter === f ? "bg-gray-300" : ""}`}
+            className={`px-2 py-1 border rounded ${todoStore.filter === f ? "bg-gray-300 dark:bg-slate-600" : "dark:border-slate-500"}`}
             onClick={() => todoStore.setFilter(f)}
+            aria-current={todoStore.filter === f ? "true" : undefined}
           >
             {f}
           </button>
         ))}
       </div>
       <button
-        className="px-2 py-1 border rounded"
+        className="px-2 py-1 border rounded dark:border-slate-500"
         onClick={() => todoStore.clearCompleted()}
         disabled={!todoStore.todos.some((t) => t.completed)}
       >

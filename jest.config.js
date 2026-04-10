@@ -3,17 +3,17 @@ export default {
   testEnvironment: "jsdom",
   moduleFileExtensions: ["ts", "tsx", "js"],
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        tsconfig: {
+          jsx: "react-jsx",
+          types: ["jest", "@testing-library/jest-dom"],
+        },
+      },
+    ],
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-  globals: {
-    "ts-jest": {
-      tsconfig: {
-        jsx: "react-jsx",
-        types: ["jest", "@testing-library/jest-dom"],
-      },
-    },
-  },
   moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
