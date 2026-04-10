@@ -138,7 +138,7 @@ func (s *Store) Delete(id int64) error {
     return nil
 }
 
-func (s *Store) ClearCompleted() error {
+func (s *Store) DeleteCompleted() error {
     _, err := s.DB.Exec("DELETE FROM todos WHERE completed = 1")
     return err
 }

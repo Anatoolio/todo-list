@@ -97,7 +97,7 @@ func (s *Store) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 
 // POST /api/todos/clear-completed
 func (s *Store) ClearCompleted(w http.ResponseWriter, r *http.Request) {
-    if err := s.ClearCompleted(); err != nil {
+    if err := s.DeleteCompleted(); err != nil {
         writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
         return
     }

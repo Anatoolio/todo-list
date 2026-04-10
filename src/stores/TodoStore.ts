@@ -33,8 +33,8 @@ export class TodoStore {
                 (todos) => {
                     try {
                         localStorage.setItem("todo-app/todos", JSON.stringify(todos));
-                    } catch {
-                        // ignore storage errors
+                    } catch (e) {
+                        console.error("[TodoStore] Failed to save todos to localStorage:", e);
                     }
                 }
             );
@@ -42,6 +42,7 @@ export class TodoStore {
     }
 
     addTodo(title: string) {
+        if (!title.trim()) return;
         if (this.useApi) {
             return this.apiCreate(title);
         }
@@ -51,8 +52,8 @@ export class TodoStore {
     toggleTodo(id: number) {
         if (this.useApi) {
             const todo = this.todos.find((t) => t.id === id);
-            const next = !todo?.completed;
-            return this.apiUpdate(id, { completed: next });
+            if (!todo) return;
+            return this.apiUpdate(id, { completed: !todo.completed });
         }
         const todo = this.todos.find((t) => t.id === id);
         if (todo) todo.completed = !todo.completed;
@@ -60,6 +61,13 @@ export class TodoStore {
 
     setFilter(filter: "all" | "active" | "completed") {
         this.filter = filter;
+    }
+
+    deleteTodo(id: number) {
+        if (this.useApi) {
+            return this.apiDelete(id);
+        }
+        this.todos = this.todos.filter((t) => t.id !== id);
     }
 
     clearCompleted() {
@@ -98,8 +106,8 @@ export class TodoStore {
                 const maxId = this.todos.reduce((m, t) => Math.max(m, t.id), 0);
                 this.nextId = maxId + 1;
             }
-        } catch {
-            // ignore broken storage
+        } catch (e) {
+            console.error("[TodoStore] Failed to load todos from localStorage:", e);
         }
     }
 
@@ -144,8 +152,24 @@ export class TodoStore {
                 const maxId = this.todos.reduce((m, td) => Math.max(m, td.id), 0);
                 this.nextId = maxId + 1;
             });
-        } catch {
-            // ignore for demo
+        } catch (e) {
+            runInAction(() => {
+                this.error = e instanceof Error ? e.message : "create failed";
+            });
+        }
+    }
+
+    private async apiDelete(id: number) {
+        try {
+            const res = await fetch(`/api/todos/${id}`, { method: "DELETE" });
+            if (!res.ok) throw new Error("delete failed");
+            runInAction(() => {
+                this.todos = this.todos.filter((t) => t.id !== id);
+            });
+        } catch (e) {
+            runInAction(() => {
+                this.error = e instanceof Error ? e.message : "delete failed";
+            });
         }
     }
 
@@ -164,8 +188,10 @@ export class TodoStore {
                     if (patch.completed !== undefined) todo.completed = patch.completed;
                 }
             });
-        } catch {
-            // ignore for demo
+        } catch (e) {
+            runInAction(() => {
+                this.error = e instanceof Error ? e.message : "update failed";
+            });
         }
     }
 
@@ -176,8 +202,10 @@ export class TodoStore {
             runInAction(() => {
                 this.todos = this.todos.filter((t) => !t.completed);
             });
-        } catch {
-            // ignore for demo
+        } catch (e) {
+            runInAction(() => {
+                this.error = e instanceof Error ? e.message : "clear failed";
+            });
         }
     }
 }
