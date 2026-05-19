@@ -1,0 +1,33 @@
+# Dependencies & build output
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+
+# Lockfiles (huge, noisy in context)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs & caches
+*.log
+.cache/
+.turbo/
+.parcel-cache/
+*.tsbuildinfo
+
+# OS / editor junk
+.DS_Store
+.vscode/
+.idea/
+
+# Env files (may contain secrets)
+.env
+.env.*
+
+# VCS internals
+.git/
+
+# Claude's own worktrees/state
+.claude/

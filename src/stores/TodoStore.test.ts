@@ -1,72 +1,64 @@
-import { TodoStore } from "./TodoStore";
-
-const getStored = () => {
-  const raw = localStorage.getItem("todo-app/todos");
-  return raw ? JSON.parse(raw) : null;
-};
+import { useTodoStore, resetTodoStore, STORAGE_KEY } from "./todoStore";
 
 beforeEach(() => {
   localStorage.clear();
-  jest.restoreAllMocks();
+  resetTodoStore();
 });
 
-test("adds, toggles, filters, remaining and clearCompleted", () => {
-  const store = new TodoStore();
+test("addTodo trims, rejects empty/whitespace, returns boolean", () => {
+  const { addTodo } = useTodoStore.getState();
+  expect(addTodo("")).toBe(false);
+  expect(addTodo("   ")).toBe(false);
+  expect(useTodoStore.getState().todos).toHaveLength(0);
 
-  expect(store.todos).toHaveLength(0);
-  expect(store.remaining).toBe(0);
-
-  store.addTodo("a");
-  store.addTodo("b");
-  expect(store.todos).toHaveLength(2);
-  expect(store.remaining).toBe(2);
-
-  // toggle first
-  const firstId = store.todos[0].id;
-  store.toggleTodo(firstId);
-  expect(store.todos[0].completed).toBe(true);
-  expect(store.remaining).toBe(1);
-
-  // filters
-  store.setFilter("active");
-  expect(store.filteredTodos.map((t) => t.title)).toEqual(["b"]);
-  store.setFilter("completed");
-  expect(store.filteredTodos.map((t) => t.title)).toEqual(["a"]);
-  store.setFilter("all");
-  expect(store.filteredTodos.map((t) => t.title)).toEqual(["a", "b"]);
-
-  // clear completed
-  store.clearCompleted();
-  expect(store.todos.map((t) => t.title)).toEqual(["b"]);
-  expect(store.remaining).toBe(1);
+  expect(addTodo("  hello  ")).toBe(true);
+  expect(useTodoStore.getState().todos[0].title).toBe("hello");
 });
 
-test("persists changes to localStorage and survives errors", () => {
-  const store = new TodoStore();
-  // happy path: setItem called with serialized todos
-  store.addTodo("persist me");
-  const stored = getStored();
-  expect(Array.isArray(stored)).toBe(true);
-  expect(stored![0]).toMatchObject({ title: "persist me", completed: false });
+test("toggle, remove, filter, remaining, clearCompleted", () => {
+  const { addTodo, toggleTodo, removeTodo, setFilter, clearCompleted } = useTodoStore.getState();
 
-  // simulate storage error; should not throw
-  const spy = jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
-    throw new Error("fail");
-  });
-  expect(() => store.addTodo("no crash")).not.toThrow();
-  spy.mockRestore();
+  addTodo("a");
+  addTodo("b");
+  addTodo("c");
+
+  const ids = useTodoStore.getState().todos.map((t) => t.id);
+  toggleTodo(ids[0]);
+  expect(useTodoStore.getState().todos[0].completed).toBe(true);
+
+  setFilter("active");
+  let state = useTodoStore.getState();
+  expect(state.todos.filter((t) => !t.completed).map((t) => t.title)).toEqual(["b", "c"]);
+
+  removeTodo(ids[1]);
+  state = useTodoStore.getState();
+  expect(state.todos.map((t) => t.title)).toEqual(["a", "c"]);
+
+  toggleTodo(ids[2]);
+  expect(clearCompleted()).toBe(2);
+  expect(useTodoStore.getState().todos).toHaveLength(0);
+  expect(clearCompleted()).toBe(0);
 });
 
-test("loads from localStorage and sets nextId correctly", () => {
-  const preload = [
-    { id: 5, title: "old 1", completed: false },
-    { id: 7, title: "old 2", completed: true },
-  ];
-  localStorage.setItem("todo-app/todos", JSON.stringify(preload));
+test("editTodo trims and rejects empty", () => {
+  const { addTodo, editTodo } = useTodoStore.getState();
+  addTodo("original");
+  const id = useTodoStore.getState().todos[0].id;
 
-  const store = new TodoStore();
-  expect(store.todos.map((t) => t.title)).toEqual(["old 1", "old 2"]);
-  // next add should use id 8
-  store.addTodo("new");
-  expect(store.todos.find((t) => t.title === "new")!.id).toBe(8);
+  expect(editTodo(id, "")).toBe(false);
+  expect(editTodo(id, "   ")).toBe(false);
+  expect(useTodoStore.getState().todos[0].title).toBe("original");
+
+  expect(editTodo(id, "  updated  ")).toBe(true);
+  expect(useTodoStore.getState().todos[0].title).toBe("updated");
+});
+
+test("persists state to localStorage", () => {
+  useTodoStore.getState().addTodo("persist me");
+
+  const raw = localStorage.getItem(STORAGE_KEY);
+  expect(raw).not.toBeNull();
+  const parsed = JSON.parse(raw!);
+  expect(parsed.state.todos[0]).toMatchObject({ title: "persist me", completed: false });
+  expect(parsed.state.nextId).toBe(2);
 });
