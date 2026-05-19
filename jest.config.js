@@ -15,9 +15,6 @@ export default {
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   testPathIgnorePatterns: ["/node_modules/", "/dist/", "/.claude/"],
-  moduleNameMapper: {
-    "\\.(css|less|scss|sass)$": "identity-obj-proxy",
-  },
   collectCoverage: false,
   collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/vite-env.d.ts", "!src/main.tsx"],
   coverageThreshold: {
