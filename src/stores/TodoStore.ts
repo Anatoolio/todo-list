@@ -1,4 +1,7 @@
-import { makeAutoObservable, reaction } from "mobx";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+export type TodoFilterValue = "all" | "active" | "completed";
 
 export interface Todo {
   id: number;
@@ -6,72 +9,86 @@ export interface Todo {
   completed: boolean;
 }
 
-export class TodoStore {
-  todos: Todo[] = [];
-  filter: "all" | "active" | "completed" = "all";
-  nextId = 1;
-
-  constructor() {
-    makeAutoObservable(this); // делает все поля реактивными
-    this.load();
-    reaction(
-      () => this.todos.map((t) => ({ id: t.id, title: t.title, completed: t.completed })),
-      (todos) => {
-        try {
-          localStorage.setItem("todo-app/todos", JSON.stringify(todos));
-        } catch {
-          // ignore storage errors
-        }
-      }
-    );
-  }
-
-  addTodo(title: string) {
-    this.todos.push({ id: this.nextId++, title, completed: false });
-  }
-
-  toggleTodo(id: number) {
-    const todo = this.todos.find((t) => t.id === id);
-    if (todo) todo.completed = !todo.completed;
-  }
-
-  setFilter(filter: "all" | "active" | "completed") {
-    this.filter = filter;
-  }
-
-  clearCompleted() {
-    this.todos = this.todos.filter((t) => !t.completed);
-  }
-
-  get filteredTodos() {
-    switch (this.filter) {
-      case "active":
-        return this.todos.filter((t) => !t.completed);
-      case "completed":
-        return this.todos.filter((t) => t.completed);
-      default:
-        return this.todos;
-    }
-  }
-
-  get remaining() {
-    return this.todos.filter((t) => !t.completed).length;
-  }
-
-  private load() {
-    try {
-      const raw = localStorage.getItem("todo-app/todos");
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as { id: number; title: string; completed: boolean }[];
-      if (Array.isArray(parsed)) {
-        this.todos = parsed.map((t) => ({ id: t.id, title: t.title, completed: !!t.completed }));
-        const maxId = this.todos.reduce((m, t) => Math.max(m, t.id), 0);
-        this.nextId = maxId + 1;
-      }
-    } catch {
-      // ignore broken storage
-    }
-  }
+interface TodoState {
+  todos: Todo[];
+  filter: TodoFilterValue;
+  nextId: number;
+  addTodo: (title: string) => boolean;
+  toggleTodo: (id: number) => void;
+  removeTodo: (id: number) => void;
+  editTodo: (id: number, title: string) => boolean;
+  setFilter: (filter: TodoFilterValue) => void;
+  clearCompleted: () => number;
 }
 
-export const todoStore = new TodoStore();
+export const STORAGE_KEY = "todo-app/todos";
+
+export const useTodoStore = create<TodoState>()(
+  persist(
+    (set, get) => ({
+      todos: [],
+      filter: "all",
+      nextId: 1,
+
+      addTodo: (title) => {
+        const trimmed = title.trim();
+        if (!trimmed) return false;
+        set((s) => ({
+          todos: [...s.todos, { id: s.nextId, title: trimmed, completed: false }],
+          nextId: s.nextId + 1,
+        }));
+        return true;
+      },
+
+      toggleTodo: (id) =>
+        set((s) => ({
+          todos: s.todos.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
+        })),
+
+      removeTodo: (id) =>
+        set((s) => ({
+          todos: s.todos.filter((t) => t.id !== id),
+        })),
+
+      editTodo: (id, title) => {
+        const trimmed = title.trim();
+        if (!trimmed) return false;
+        set((s) => ({
+          todos: s.todos.map((t) => (t.id === id ? { ...t, title: trimmed } : t)),
+        }));
+        return true;
+      },
+
+      setFilter: (filter) => set({ filter }),
+
+      clearCompleted: () => {
+        const before = get().todos.length;
+        const todos = get().todos.filter((t) => !t.completed);
+        set({ todos });
+        return before - todos.length;
+      },
+    }),
+    {
+      name: STORAGE_KEY,
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({ todos: s.todos, nextId: s.nextId }),
+    }
+  )
+);
+
+export const selectFilteredTodos = (s: TodoState) => {
+  switch (s.filter) {
+    case "active":
+      return s.todos.filter((t) => !t.completed);
+    case "completed":
+      return s.todos.filter((t) => t.completed);
+    default:
+      return s.todos;
+  }
+};
+
+export const selectRemaining = (s: TodoState) => s.todos.filter((t) => !t.completed).length;
+export const selectHasCompleted = (s: TodoState) => s.todos.some((t) => t.completed);
+
+// test helper — resets state between tests
+export const resetTodoStore = () => useTodoStore.setState({ todos: [], filter: "all", nextId: 1 });

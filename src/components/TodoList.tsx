@@ -1,28 +1,28 @@
-import { observer } from "mobx-react-lite";
-import { useStores } from "../stores/context";
+import { useShallow } from "zustand/react/shallow";
+import { useTodoStore, selectFilteredTodos } from "../stores/todoStore";
+import TodoItem from "./TodoItem";
 
-const TodoList = observer(() => {
-  const { todoStore } = useStores();
+function TodoList() {
+  const todos = useTodoStore(useShallow(selectFilteredTodos));
+
+  if (todos.length === 0) {
+    return <p className="text-center text-zinc-600 text-sm py-6">No tasks here</p>;
+  }
+
+  // Show completed at top (dimmed, like in the mockup), then active below.
+  const completed = todos.filter((t) => t.completed);
+  const active = todos.filter((t) => !t.completed);
 
   return (
-    <ul className="mb-4">
-      {todoStore.filteredTodos.map((todo) => (
-        <li
-          key={todo.id}
-          className="flex items-center gap-2 py-1 cursor-pointer"
-          onClick={() => todoStore.toggleTodo(todo.id)}
-        >
-          <input
-            type="checkbox"
-            checked={todo.completed}
-            onClick={(e) => e.stopPropagation()}
-            onChange={() => todoStore.toggleTodo(todo.id)}
-          />
-          <span className={todo.completed ? "line-through text-gray-400" : ""}>{todo.title}</span>
-        </li>
+    <ul className="mt-1">
+      {completed.map((todo) => (
+        <TodoItem key={todo.id} todo={todo} />
+      ))}
+      {active.map((todo) => (
+        <TodoItem key={todo.id} todo={todo} />
       ))}
     </ul>
   );
-});
+}
 
 export default TodoList;

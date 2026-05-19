@@ -12,6 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Test / build artifacts
+coverage
+*.tsbuildinfo
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Claude Code local state
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
