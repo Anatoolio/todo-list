@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { useTodoStore, type Todo } from "../stores/todoStore";
+import { useTodoStore, type Todo } from "../stores/TodoStore";
 
 interface Props {
   todo: Todo;

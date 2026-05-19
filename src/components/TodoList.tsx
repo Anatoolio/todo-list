@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { useTodoStore, selectFilteredTodos } from "../stores/todoStore";
+import { useTodoStore, selectFilteredTodos } from "../stores/TodoStore";
 import TodoItem from "./TodoItem";
 
 function TodoList() {
@@ -9,7 +9,6 @@ function TodoList() {
     return <p className="text-center text-zinc-600 text-sm py-6">No tasks here</p>;
   }
 
-  // Show completed at top (dimmed, like in the mockup), then active below.
   const completed = todos.filter((t) => t.completed);
   const active = todos.filter((t) => !t.completed);
 

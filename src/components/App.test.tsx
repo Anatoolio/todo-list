@@ -1,6 +1,6 @@
 import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { resetTodoStore, useTodoStore } from "../stores/todoStore";
+import { resetTodoStore, useTodoStore } from "../stores/TodoStore";
 import App from "../App";
 
 beforeEach(() => {
@@ -120,7 +120,6 @@ test("edits a todo: Enter commits, Escape cancels", async () => {
 
   await user.type(getInput(), "Original{enter}");
 
-  // commit edit
   await user.click(screen.getByRole("button", { name: /edit "Original"/i }));
   const editInput = screen.getByRole("textbox", { name: /edit task "Original"/i });
   await user.clear(editInput);
@@ -128,7 +127,6 @@ test("edits a todo: Enter commits, Escape cancels", async () => {
   expect(screen.getByText("Renamed")).toBeInTheDocument();
   expect(screen.queryByText("Original")).not.toBeInTheDocument();
 
-  // cancel edit
   await user.click(screen.getByRole("button", { name: /edit "Renamed"/i }));
   const editInput2 = screen.getByRole("textbox", { name: /edit task "Renamed"/i });
   await user.clear(editInput2);
@@ -152,7 +150,6 @@ test("editing to empty title deletes the todo", async () => {
 });
 
 test("hydrates from localStorage on load", () => {
-  // zustand persist format: { state: {...}, version: 0 }
   localStorage.setItem(
     "todo-app/todos",
     JSON.stringify({
@@ -166,7 +163,6 @@ test("hydrates from localStorage on load", () => {
       version: 0,
     })
   );
-  // force rehydrate
   useTodoStore.persist.rehydrate();
 
   render(<App />);

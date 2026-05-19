@@ -90,5 +90,5 @@ export const selectFilteredTodos = (s: TodoState) => {
 export const selectRemaining = (s: TodoState) => s.todos.filter((t) => !t.completed).length;
 export const selectHasCompleted = (s: TodoState) => s.todos.some((t) => t.completed);
 
-// test helper — resets state between tests
+// For testing
 export const resetTodoStore = () => useTodoStore.setState({ todos: [], filter: "all", nextId: 1 });
