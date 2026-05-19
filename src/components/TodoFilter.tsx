@@ -4,7 +4,7 @@ import {
   selectRemaining,
   selectHasCompleted,
   type TodoFilterValue,
-} from "../stores/todoStore";
+} from "../stores/TodoStore";
 
 const FILTERS: TodoFilterValue[] = ["all", "active", "completed"];
 const NOTICE_TIMEOUT_MS = 2500;

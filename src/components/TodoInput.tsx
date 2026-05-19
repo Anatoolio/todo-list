@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState, type KeyboardEvent } from "react";
-import { useTodoStore } from "../stores/todoStore";
+import { useTodoStore } from "../stores/TodoStore";
 
 const EMPTY_ERROR = "Please enter a task";
 

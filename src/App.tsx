@@ -15,7 +15,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-brand flex items-center justify-center p-4 relative overflow-hidden">
-      {/* decorative blob */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -bottom-40 -right-40 w-[28rem] h-[28rem] rounded-full bg-white/25"
@@ -25,9 +24,7 @@ function App() {
         className="pointer-events-none absolute -top-40 -left-40 w-[24rem] h-[24rem] rounded-full bg-white/10"
       />
 
-      {/* Phone card */}
       <div className="relative w-full max-w-sm bg-surface rounded-[2rem] overflow-hidden shadow-2xl">
-        {/* Header */}
         <header className="bg-brand text-zinc-900 px-5 pt-6 pb-5 flex items-center justify-between">
           <button type="button" aria-label="Back" className="p-1 -ml-1 rounded hover:bg-black/10">
             <svg
@@ -53,7 +50,6 @@ function App() {
           </button>
         </header>
 
-        {/* Body */}
         <div className="px-5 pt-5 pb-24 min-h-[34rem] relative">
           <div className="mb-4">
             <h2 className="text-white font-semibold text-lg">Today</h2>
@@ -65,7 +61,6 @@ function App() {
           <TodoList />
         </div>
 
-        {/* FAB */}
         <button
           type="button"
           onClick={() => inputRef.current?.submit()}
