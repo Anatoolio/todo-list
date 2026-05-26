@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { Check, Pencil, Trash2 } from "lucide-react";
 import { useTodoStore, type Todo } from "../stores/TodoStore";
 
 interface Props {
@@ -27,11 +28,9 @@ function TodoItem({ todo }: Props) {
   };
 
   const commit = () => {
-    if (editTodo(todo.id, draft)) {
-      setEditing(false);
-    } else {
-      removeTodo(todo.id);
-    }
+    const trimmed = draft.trim();
+    if (trimmed) editTodo(todo.id, trimmed);
+    setEditing(false);
   };
 
   const cancel = () => {
@@ -52,27 +51,13 @@ function TodoItem({ todo }: Props) {
           checked={todo.completed}
           onChange={() => toggleTodo(todo.id)}
           className="sr-only"
-          aria-label={`Mark "${todo.title}" as ${todo.completed ? "active" : "completed"}`}
         />
         <span
           className={`flex items-center justify-center w-5 h-5 rounded-full border-2 transition ${
             todo.completed ? "bg-brand border-brand" : "border-zinc-500 group-hover:border-zinc-300"
           }`}
         >
-          {todo.completed && (
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="#1A1A1A"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="3 8.5 6.5 12 13 5" />
-            </svg>
-          )}
+          {todo.completed && <Check size={12} strokeWidth={3} className="text-zinc-900" />}
         </span>
       </label>
 
@@ -88,10 +73,9 @@ function TodoItem({ todo }: Props) {
         />
       ) : (
         <span
-          className={`flex-grow text-sm cursor-text select-none ${
+          className={`flex-grow text-sm select-none ${
             todo.completed ? "line-through text-zinc-600" : "text-white"
           }`}
-          onDoubleClick={startEdit}
         >
           {todo.title}
         </span>
@@ -104,19 +88,7 @@ function TodoItem({ todo }: Props) {
           aria-label={`Edit "${todo.title}"`}
           className="text-zinc-500 hover:text-brand opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
-          </svg>
+          <Pencil size={14} />
         </button>
       )}
       <button
@@ -125,21 +97,7 @@ function TodoItem({ todo }: Props) {
         aria-label={`Delete "${todo.title}"`}
         className="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition"
       >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="3 6 5 6 21 6" />
-          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-          <path d="M10 11v6M14 11v6" />
-          <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
-        </svg>
+        <Trash2 size={14} />
       </button>
     </li>
   );

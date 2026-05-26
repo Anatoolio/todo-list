@@ -1,32 +1,17 @@
-import { forwardRef, useImperativeHandle, useState, type KeyboardEvent } from "react";
-import { useTodoStore } from "../stores/TodoStore";
+import type { KeyboardEvent } from "react";
 
-const EMPTY_ERROR = "Please enter a task";
-
-export interface TodoInputHandle {
-  submit: () => void;
+interface Props {
+  value: string;
+  error: string | null;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
 }
 
-const TodoInput = forwardRef<TodoInputHandle>(function TodoInput(_, ref) {
-  const [text, setText] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const addTodo = useTodoStore((s) => s.addTodo);
-
-  const submit = () => {
-    if (!addTodo(text)) {
-      setError(EMPTY_ERROR);
-      return;
-    }
-    setText("");
-    setError(null);
-  };
-
-  useImperativeHandle(ref, () => ({ submit }));
-
+function TodoInput({ value, error, onChange, onSubmit }: Props) {
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      submit();
+      onSubmit();
     }
   };
 
@@ -40,25 +25,21 @@ const TodoInput = forwardRef<TodoInputHandle>(function TodoInput(_, ref) {
         <input
           type="text"
           className="bg-transparent flex-grow text-white placeholder-zinc-500 outline-none text-sm"
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            if (error) setError(null);
-          }}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="What needs to be done?"
           aria-label="New task"
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? "todo-input-error" : undefined}
         />
       </div>
       {error && (
-        <p id="todo-input-error" role="alert" className="text-red-400 text-xs mt-1.5 ml-1">
+        <p role="alert" className="text-red-400 text-xs mt-1.5 ml-1">
           {error}
         </p>
       )}
     </div>
   );
-});
+}
 
 export default TodoInput;
