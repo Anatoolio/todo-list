@@ -9,15 +9,9 @@ function TodoList() {
     return <p className="text-center text-zinc-600 text-sm py-6">No tasks here</p>;
   }
 
-  const completed = todos.filter((t) => t.completed);
-  const active = todos.filter((t) => !t.completed);
-
   return (
     <ul className="mt-1">
-      {completed.map((todo) => (
-        <TodoItem key={todo.id} todo={todo} />
-      ))}
-      {active.map((todo) => (
+      {todos.map((todo) => (
         <TodoItem key={todo.id} todo={todo} />
       ))}
     </ul>

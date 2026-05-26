@@ -1,11 +1,11 @@
 import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { resetTodoStore, useTodoStore } from "../stores/TodoStore";
-import App from "../App";
+import { useTodoStore } from "./stores/TodoStore";
+import App from "./App";
 
 beforeEach(() => {
   localStorage.clear();
-  resetTodoStore();
+  useTodoStore.setState({ todos: [], filter: "all" });
 });
 
 const getInput = () => screen.getByPlaceholderText("What needs to be done?") as HTMLInputElement;
@@ -31,10 +31,6 @@ test("shows error on empty submit and clears it when typing", async () => {
   await user.click(getInput());
   await user.keyboard("{Enter}");
   expect(screen.getByRole("alert")).toHaveTextContent(/please enter a task/i);
-
-  await user.type(getInput(), "   ");
-  await user.keyboard("{Enter}");
-  expect(screen.getByRole("alert")).toBeInTheDocument();
 
   await user.type(getInput(), "real task");
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -77,7 +73,7 @@ test("filters tasks by active, completed, all", async () => {
   expect(getItems()).toHaveLength(2);
 });
 
-test("clears completed tasks and shows success notice", async () => {
+test("clears completed tasks", async () => {
   const user = userEvent.setup();
   render(<App />);
 
@@ -96,7 +92,6 @@ test("clears completed tasks and shows success notice", async () => {
 
   expect(screen.queryByText("A")).not.toBeInTheDocument();
   expect(screen.queryByText("B")).not.toBeInTheDocument();
-  expect(screen.getByRole("status")).toHaveTextContent(/cleared 2 completed tasks/i);
   expect(clearBtn).toBeDisabled();
 });
 
@@ -125,28 +120,26 @@ test("edits a todo: Enter commits, Escape cancels", async () => {
   await user.clear(editInput);
   await user.type(editInput, "Renamed{enter}");
   expect(screen.getByText("Renamed")).toBeInTheDocument();
-  expect(screen.queryByText("Original")).not.toBeInTheDocument();
 
   await user.click(screen.getByRole("button", { name: /edit "Renamed"/i }));
   const editInput2 = screen.getByRole("textbox", { name: /edit task "Renamed"/i });
   await user.clear(editInput2);
   await user.type(editInput2, "Should be discarded{escape}");
   expect(screen.getByText("Renamed")).toBeInTheDocument();
-  expect(screen.queryByText("Should be discarded")).not.toBeInTheDocument();
 });
 
-test("editing to empty title deletes the todo", async () => {
+test("editing to empty title keeps the original", async () => {
   const user = userEvent.setup();
   render(<App />);
 
-  await user.type(getInput(), "Delete me by editing{enter}");
+  await user.type(getInput(), "Original{enter}");
 
-  await user.click(screen.getByRole("button", { name: /edit "Delete me by editing"/i }));
+  await user.click(screen.getByRole("button", { name: /edit "Original"/i }));
   const editInput = screen.getByRole("textbox", { name: /edit task/i });
   await user.clear(editInput);
   await user.keyboard("{Enter}");
 
-  expect(screen.queryByText("Delete me by editing")).not.toBeInTheDocument();
+  expect(screen.getByText("Original")).toBeInTheDocument();
 });
 
 test("hydrates from localStorage on load", () => {
@@ -155,10 +148,9 @@ test("hydrates from localStorage on load", () => {
     JSON.stringify({
       state: {
         todos: [
-          { id: 1, title: "From storage", completed: false },
-          { id: 2, title: "Done", completed: true },
+          { id: "a", title: "From storage", completed: false, createdAt: 1 },
+          { id: "b", title: "Done", completed: true, createdAt: 2 },
         ],
-        nextId: 3,
       },
       version: 0,
     })

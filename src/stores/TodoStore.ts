@@ -4,41 +4,37 @@ import { persist, createJSONStorage } from "zustand/middleware";
 export type TodoFilterValue = "all" | "active" | "completed";
 
 export interface Todo {
-  id: number;
+  id: string;
   title: string;
   completed: boolean;
+  createdAt: number;
 }
 
 interface TodoState {
   todos: Todo[];
   filter: TodoFilterValue;
-  nextId: number;
-  addTodo: (title: string) => boolean;
-  toggleTodo: (id: number) => void;
-  removeTodo: (id: number) => void;
-  editTodo: (id: number, title: string) => boolean;
+  addTodo: (title: string) => void;
+  toggleTodo: (id: string) => void;
+  removeTodo: (id: string) => void;
+  editTodo: (id: string, title: string) => void;
   setFilter: (filter: TodoFilterValue) => void;
-  clearCompleted: () => number;
+  clearCompleted: () => void;
 }
 
 export const STORAGE_KEY = "todo-app/todos";
 
 export const useTodoStore = create<TodoState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       todos: [],
       filter: "all",
-      nextId: 1,
 
-      addTodo: (title) => {
-        const trimmed = title.trim();
-        if (!trimmed) return false;
-        set((s) => ({
-          todos: [...s.todos, { id: s.nextId, title: trimmed, completed: false }],
-          nextId: s.nextId + 1,
-        }));
-        return true;
-      },
+      addTodo: (title) =>
+        set((s) => {
+          const createdAt = Date.now();
+          const id = `${createdAt}-${s.todos.length}`;
+          return { todos: [...s.todos, { id, title, completed: false, createdAt }] };
+        }),
 
       toggleTodo: (id) =>
         set((s) => ({
@@ -50,45 +46,37 @@ export const useTodoStore = create<TodoState>()(
           todos: s.todos.filter((t) => t.id !== id),
         })),
 
-      editTodo: (id, title) => {
-        const trimmed = title.trim();
-        if (!trimmed) return false;
+      editTodo: (id, title) =>
         set((s) => ({
-          todos: s.todos.map((t) => (t.id === id ? { ...t, title: trimmed } : t)),
-        }));
-        return true;
-      },
+          todos: s.todos.map((t) => (t.id === id ? { ...t, title } : t)),
+        })),
 
       setFilter: (filter) => set({ filter }),
 
-      clearCompleted: () => {
-        const before = get().todos.length;
-        const todos = get().todos.filter((t) => !t.completed);
-        set({ todos });
-        return before - todos.length;
-      },
+      clearCompleted: () =>
+        set((s) => ({
+          todos: s.todos.filter((t) => !t.completed),
+        })),
     }),
     {
       name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ todos: s.todos, nextId: s.nextId }),
+      partialize: (s) => ({ todos: s.todos }),
     }
   )
 );
 
 export const selectFilteredTodos = (s: TodoState) => {
+  const sorted = [...s.todos].sort((a, b) => Number(a.completed) - Number(b.completed));
   switch (s.filter) {
     case "active":
-      return s.todos.filter((t) => !t.completed);
+      return sorted.filter((t) => !t.completed);
     case "completed":
-      return s.todos.filter((t) => t.completed);
+      return sorted.filter((t) => t.completed);
     default:
-      return s.todos;
+      return sorted;
   }
 };
 
 export const selectRemaining = (s: TodoState) => s.todos.filter((t) => !t.completed).length;
 export const selectHasCompleted = (s: TodoState) => s.todos.some((t) => t.completed);
-
-// For testing
-export const resetTodoStore = () => useTodoStore.setState({ todos: [], filter: "all", nextId: 1 });

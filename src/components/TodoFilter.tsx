@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import {
   useTodoStore,
   selectRemaining,
@@ -7,7 +6,6 @@ import {
 } from "../stores/TodoStore";
 
 const FILTERS: TodoFilterValue[] = ["all", "active", "completed"];
-const NOTICE_TIMEOUT_MS = 2500;
 
 function TodoFilter() {
   const filter = useTodoStore((s) => s.filter);
@@ -15,25 +13,6 @@ function TodoFilter() {
   const clearCompleted = useTodoStore((s) => s.clearCompleted);
   const remaining = useTodoStore(selectRemaining);
   const hasCompleted = useTodoStore(selectHasCompleted);
-
-  const [notice, setNotice] = useState<string | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    },
-    []
-  );
-
-  const handleClearCompleted = () => {
-    const cleared = clearCompleted();
-    if (cleared > 0) {
-      setNotice(`Cleared ${cleared} completed task${cleared === 1 ? "" : "s"}`);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setNotice(null), NOTICE_TIMEOUT_MS);
-    }
-  };
 
   return (
     <div className="mb-3">
@@ -43,20 +22,19 @@ function TodoFilter() {
         </span>
         <button
           type="button"
-          onClick={handleClearCompleted}
+          onClick={clearCompleted}
           disabled={!hasCompleted}
           className="text-xs text-zinc-400 hover:text-brand disabled:text-zinc-700 disabled:hover:text-zinc-700 transition"
         >
           Clear completed
         </button>
       </div>
-      <div className="flex gap-2" role="group" aria-label="Filter tasks">
+      <div className="flex gap-2">
         {FILTERS.map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
-            aria-pressed={filter === f}
             className={`px-3 py-1 text-xs rounded-full capitalize transition ${
               filter === f
                 ? "bg-brand text-zinc-900 font-medium"
@@ -67,9 +45,6 @@ function TodoFilter() {
           </button>
         ))}
       </div>
-      <p role="status" aria-live="polite" className="text-brand text-xs mt-2 min-h-[1rem]">
-        {notice ?? ""}
-      </p>
     </div>
   );
 }
